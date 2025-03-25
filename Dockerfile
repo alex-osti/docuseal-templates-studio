@@ -1,20 +1,31 @@
 # Build stage
 FROM node:18-alpine as builder
 WORKDIR /app
+
+# Install frontend dependencies
 COPY package*.json ./
 RUN npm ci
+
+# Install MCP server dependencies
+COPY mcp-server/package*.json ./mcp-server/
+RUN cd mcp-server && npm ci
+
+# Build frontend
 COPY . .
 RUN npm install -g vite && \
-    chmod -R 777 /app/node_modules/.vite && \
     npm run build
 
 # Production stage
 FROM node:18-alpine
 WORKDIR /app
 
-# Install dependencies for production
+# Install production dependencies
 COPY package*.json ./
 RUN npm ci --only=production
+
+# Install MCP server production dependencies
+COPY mcp-server/package*.json ./mcp-server/
+RUN cd mcp-server && npm ci --only=production
 
 # Copy built files
 COPY --from=builder /app/dist ./dist
@@ -34,4 +45,4 @@ HEALTHCHECK --interval=30s --timeout=3s \
 
 # Run both servers
 CMD ["dumb-init", "sh", "-c", "cd mcp-server && node index.js & npm run preview"]
-EXPOSE 3000 3001
+EXPOSE 3000 3002
