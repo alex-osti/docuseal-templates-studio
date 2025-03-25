@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
+RUN chmod -R 777 /app/node_modules/.vite
 RUN npm run build
 
 # Production stage
