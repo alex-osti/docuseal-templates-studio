@@ -4,8 +4,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN chmod -R 777 /app/node_modules/.vite
-RUN npm run build
+RUN npm install -g vite && \
+    chmod -R 777 /app/node_modules/.vite && \
+    npm run build
 
 # Production stage
 FROM node:18-alpine
